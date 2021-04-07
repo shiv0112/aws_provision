@@ -61,14 +61,11 @@
   when: inventory_hostname in groups["master"]
 
 - name: Configure master using kubeadm
-  shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem >> kubeadm_init_log.txt
-  args:
-    chdir: /root/
-    creates: kubeadm_init_log.txt     
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem
   when: inventory_hostname in groups["master"]
  
 - name: Copy the admin files and changing ownership 
-  shell: "{{  item  }}"
+  command: "{{  item  }}"
   with_items: 
     - mkdir -p $HOME/.kube 
     - cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
@@ -76,7 +73,7 @@
   when: inventory_hostname in groups["master"]
 
 - name: Create flannel overlay network
-  shell: kubectl apply  -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml  
+  command: kubectl apply  -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml  
   when: inventory_hostname in groups["master"]
 
 - name: making conf file for netbridge
@@ -90,7 +87,7 @@
   when: inventory_hostname in groups["slaves"]
 
 - name: getting token
-  shell: kubeadm token create --print-join-command
+  command: kubeadm token create --print-join-command
   register: token 
   when: inventory_hostname in groups["master"]
 
